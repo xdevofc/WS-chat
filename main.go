@@ -1,12 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
+
+// estructura para recibir mensajes
+type Message struct {
+	User    string `json:"username"`
+	Message string `json:"message"`
+}
 
 // Upgrader is used to upgrade HTTP connections to WebSocket connections
 
@@ -44,7 +51,20 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		broadcast <- message
+		var msg Message
+		err = json.Unmarshal(message, &msg)
+
+		if err != nil {
+			fmt.Println("No se pudo descifrar el msg")
+			continue
+		}
+		fmt.Printf("User: %s  says: %s \n", msg.User, msg.Message)
+		encoded, err := json.Marshal(msg)
+
+		if err != nil {
+			fmt.Println("Error al parsear en go ")
+		}
+		broadcast <- encoded
 
 	}
 }
@@ -52,6 +72,8 @@ func handleMessage() {
 	for {
 		// grab the next message from the broadcast channel
 		message := <-broadcast
+
+		// extraemos el json
 
 		// send the message to all clients conencted
 		mutex.Lock()

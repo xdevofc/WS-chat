@@ -9,7 +9,8 @@
 <body>
    <h1>WebSocket Client</h1> 
    <div>
-    <input type="text" id="messageInput" placeholder="Enter your message">
+    <input type="text" id="messageInput" placeholder="Enter your message"><br>
+    <input type="text" id="userInput" placeholder="Write your name to be known"><br>
     <button onclick="sendMessage()">Send</button>
     <div id="message"></div>
    </div>
@@ -25,13 +26,16 @@ function connect(){
     ws = new WebSocket("ws://localhost:8080/ws");
 
     ws.onopen = function (){
+        
         console.log("connected to the Websocket server");
     }
 
     ws.onmessage = function(event) {
 
+        console.log(JSON.parse(event.data))
+        const {username, message} = JSON.parse(event.data) 
         let messageDisplay = document.getElementById("message");
-        messageDisplay.innerHTML += `<p>${event.data}</p>`;
+        messageDisplay.innerHTML += `<p>USER:${username} says: ${message}</p>`;
     }
 
     ws.onclose = function () {
@@ -47,8 +51,13 @@ function connect(){
 function sendMessage(){
         let input = document.getElementById("messageInput");
         let message = input.value;
-        ws.send(message);
         input.value = "";
+        let user = document.getElementById("userInput");
+        let username = user.value;
+        user.value = "";
+
+        const payload = JSON.stringify({username: username, message: message})
+        ws.send(payload)
     }
 connect()
    </script>
