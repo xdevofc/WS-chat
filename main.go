@@ -108,13 +108,17 @@ func handleMessage() {
 	}
 */
 func main() {
+
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fs)
+
 	http.HandleFunc("/ws", wsHandler)
 	go handleMessage()
 	fmt.Println("Web socket started in port :8080")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(Address, nil)
 
 	if err != nil {
-		fmt.Println("Error starting server", err)
+		fmt.Printf("Error starting server %v\n", err)
 	}
 
 }
