@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+    
+</head>
+<body>
+   <h1>WebSocket Client</h1> 
+   <div>
+    <input type="text" id="messageInput" placeholder="Enter your message">
+    <button onclick="sendMessage()">Send</button>
+    <div id="message"></div>
+   </div>
+
+   <script>
+
+    let ws;
+
+
+function connect(){
+
+
+    ws = new WebSocket("ws://localhost:8080/ws");
+
+    ws.onopen = function (){
+        console.log("connected to the Websocket server");
+    }
+
+    ws.onmessage = function(event) {
+
+        let messageDisplay = document.getElementById("message");
+        messageDisplay.innerHTML += `<p>${event.data}</p>`;
+    }
+
+    ws.onclose = function () {
+        console.log("WS connection closed... Retrying")
+        setTimeout(connect, 1000)
+    }
+
+    ws.onerror = function (error){
+        console.error(error)
+    }
+
+} 
+function sendMessage(){
+        let input = document.getElementById("messageInput");
+        let message = input.value;
+        ws.send(message);
+        input.value = "";
+    }
+connect()
+   </script>
+</body>
+<!-- <script type="module" src="./index.js" ></script> -->
+</html>
